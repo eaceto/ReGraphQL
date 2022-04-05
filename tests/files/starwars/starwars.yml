@@ -1,0 +1,50 @@
+routes:
+    - http:
+          uri: '/persons/{person}'
+          method: GET
+      graphql:
+          endpoint: 'https://swapi.skyra.pw/'
+          query: |
+              query($person: StarWarsPeople!) {
+                  getPerson(person: $person) {
+                      birthYear
+                      eyeColors
+                      films {
+                          title
+                      }
+                      gender
+                      hairColors
+                      height
+                      homeworld {
+                          name
+                      }
+                      mass
+                      name
+                      skinColors
+                      species {
+                          name
+                      }
+                      starships {
+                          name
+                      }
+                      vehicles {
+                          name
+                      }
+                  }
+              }
+    - http:
+          uri: '/films/{film}'
+          method: GET
+      graphql:
+          endpoint: 'https://swapi.skyra.pw/'
+          query: |
+              query($film: Float!) {
+                  getFilm(film: $film) {
+                      title
+                      releaseDate
+                      producers
+                      episodeId
+                  }
+              }
+          types:
+              film: Float

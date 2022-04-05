@@ -1,0 +1,16 @@
+services:
+  - endpoint:
+      uri: '/films/{film}'
+      method: GET
+    graphql:
+      endpoint: 'https://swapi.skyra.pw/'
+      query: |
+        {
+            getFilm(film: $film) {
+                title
+                releaseDate
+                producers
+                episodeId
+            }
+        }
+
