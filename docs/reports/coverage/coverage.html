@@ -1,0 +1,424 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>app: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/eaceto/ReGraphQL/app/configuration.go (72.0%)</option>
+				
+				<option value="file1">github.com/eaceto/ReGraphQL/app/helpers.go (0.0%)</option>
+				
+				<option value="file2">github.com/eaceto/ReGraphQL/app/http.go (0.0%)</option>
+				
+				<option value="file3">github.com/eaceto/ReGraphQL/app/routes.go (88.9%)</option>
+				
+				<option value="file4">github.com/eaceto/ReGraphQL/helpers/environment.go (100.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package app
+
+import (
+        "fmt"
+        "github.com/eaceto/ReGraphQL/helpers"
+        "github.com/spf13/viper"
+        "net"
+        "net/http"
+        "os"
+        "strconv"
+        "strings"
+        "time"
+)
+
+type App struct {
+        ServerAddr         string
+        ServicePath        string
+        ServerReadTimeout  time.Duration
+        ServerWriteTimeout time.Duration
+        RouterConfigsPath  string
+        TraceCallsEnabled  bool
+        DebugEnabled       bool
+        HTTPClient         *http.Client
+}
+
+func NewApp() (*App, error) <span class="cov8" title="1">{
+
+        viper.SetConfigFile(EnvironmentVariablesFile)
+        _ = viper.ReadInConfig()
+
+        // Parse Server host and port
+        serverHost := helpers.GetEnvVar(ServerHostKey, ServerHostDefaultValue)
+        if len(serverHost) &gt; 0 &amp;&amp; net.ParseIP(serverHost) != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("invalid %s value: '%v'", ServerHostKey, serverHost)
+        }</span>
+
+        <span class="cov8" title="1">serverPort := helpers.GetEnvVar(ServerPortKey, ServerPortDefaultValue)
+        if _, err := strconv.ParseUint(serverPort, 10, 32); err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("invalid %s value: '%v'. %v", ServerPortKey, serverPort, err)
+        }</span>
+
+        <span class="cov8" title="1">servicePath := helpers.GetEnvVar(ServicePathKey, ServicePathDefaultValue)
+        if len(servicePath) == 0 </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("invalid %s value: '%v'", ServicePathKey, servicePath)
+        }</span>
+        <span class="cov8" title="1">if !strings.HasPrefix(servicePath, "/") </span><span class="cov0" title="0">{
+                servicePath = "/" + servicePath
+        }</span>
+
+        // Parse Server configuration
+        <span class="cov8" title="1">serverReadTimeout, serverReadTimeoutError := strconv.Atoi(helpers.GetEnvVar(ServerReadTimeoutKey, ServerTimeoutDefaultValue))
+        if serverReadTimeoutError != nil || serverReadTimeout &lt; 1 </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("invalid %s value: '%v'. %v", ServerReadTimeoutKey, serverReadTimeout, serverReadTimeoutError)
+        }</span>
+
+        <span class="cov8" title="1">serverWriteTimeout, serverWriteTimeoutError := strconv.Atoi(helpers.GetEnvVar(ServerWriteTimeoutKey, ServerTimeoutDefaultValue))
+        if serverWriteTimeoutError != nil || serverWriteTimeout &lt; 1 </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("invalid %s value: '%v'. %v", ServerWriteTimeoutKey, serverWriteTimeoutError, serverWriteTimeout)
+        }</span>
+
+        <span class="cov8" title="1">traceCallsEnabled := helpers.GetEnvVar(TraceCallsKey, TraceCallsDefaultValue) == "1"
+        debugEnabled := helpers.GetEnvVar(DebugKey, DebugDefaultValue) == "1"
+
+        // Parse path for the router configuration files
+        routerConfigPath := helpers.GetEnvVar(RouterConfigPathKey, RouterConfigPathDefaultValue)
+        if _, err := os.Stat(routerConfigPath); os.IsNotExist(err) </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("path not found: invalid %s value: '%v'", RouterConfigPathKey, routerConfigPath)
+        }</span>
+
+        // Return application configuration
+        <span class="cov8" title="1">return &amp;App{
+                ServerAddr:         serverHost + ":" + serverPort,
+                ServicePath:        servicePath,
+                RouterConfigsPath:  routerConfigPath,
+                ServerReadTimeout:  time.Duration(serverReadTimeout) * time.Second,
+                ServerWriteTimeout: time.Duration(serverWriteTimeout) * time.Second,
+                TraceCallsEnabled:  traceCallsEnabled,
+                DebugEnabled:       debugEnabled,
+                HTTPClient:         &amp;http.Client{Timeout: time.Duration(serverReadTimeout) * time.Second},
+        }, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package app
+
+import (
+        "net/http"
+)
+
+// copyHeader from "/net/http/httputil/reverseproxy.go"
+func copyHeader(dst, src http.Header) <span class="cov0" title="0">{
+        for k, vv := range src </span><span class="cov0" title="0">{
+                for _, v := range vv </span><span class="cov0" title="0">{
+                        dst.Add(k, v)
+                }</span>
+        }
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package app
+
+import (
+        "bytes"
+        "encoding/json"
+        "fmt"
+        "github.com/gorilla/mux"
+        "io"
+        "k8s.io/klog/v2"
+        "net/http"
+        "strconv"
+)
+
+type graphQLPayload struct {
+        OperationName *string                `json:"operationName,omitempty"`
+        Query         string                 `json:"query,omitempty"`
+        Variables     map[string]interface{} `json:"variables,omitempty"`
+}
+
+func (a *App) GetServiceHTTPRouter(routes []Route) (*mux.Router, error) <span class="cov0" title="0">{
+        r := mux.NewRouter().PathPrefix(a.ServicePath).Subrouter()
+        if a.TraceCallsEnabled </span><span class="cov0" title="0">{
+                r.Use(traceCallsMiddleware)
+        }</span>
+
+        <span class="cov0" title="0">for idx, route := range routes </span><span class="cov0" title="0">{
+                if a.DebugEnabled </span><span class="cov0" title="0">{
+                        klog.Infof("Loading route #%v - [%s] %s\n", idx, route.HTTP.Method, route.HTTP.URI)
+                }</span>
+                <span class="cov0" title="0">r.HandleFunc(route.HTTP.URI, a.createHandler(route)).Methods(route.HTTP.Method)</span>
+        }
+
+        <span class="cov0" title="0">return r, nil</span>
+}
+
+func (a *App) createHandler(route Route) func(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        return func(w http.ResponseWriter, r *http.Request) </span><span class="cov0" title="0">{
+                params, err := a.createQueryParams(r, route)
+                if err != nil </span><span class="cov0" title="0">{
+                        http.Error(w, "could not create request", http.StatusBadRequest)
+                        return
+                }</span>
+
+                <span class="cov0" title="0">data := graphQLPayload{
+                        OperationName: nil,
+                        Query:         route.GraphQL.Query,
+                        Variables:     params,
+                }
+
+                payloadBytes, _ := json.Marshal(data)
+                graphQLBody := bytes.NewReader(payloadBytes)
+
+                graphQLRequest, err := http.NewRequest("POST", route.GraphQL.Endpoint, graphQLBody)
+                if err != nil </span><span class="cov0" title="0">{
+                        http.Error(w, "could not create request", http.StatusBadRequest)
+                        return
+                }</span>
+
+                <span class="cov0" title="0">for key, vv := range r.Header </span><span class="cov0" title="0">{
+                        for _, v := range vv </span><span class="cov0" title="0">{
+                                graphQLRequest.Header.Add(key, v)
+                        }</span>
+                }
+
+                <span class="cov0" title="0">graphQLRequest.Header.Add("Accept", "*/*")
+                graphQLRequest.Header.Add("Content-Type", "application/json")
+                graphQLRequest.Header.Set("X-Forwarded-For", r.RemoteAddr)
+
+                response, err := a.HTTPClient.Do(graphQLRequest)
+                if err != nil </span><span class="cov0" title="0">{
+                        http.Error(w, err.Error(), http.StatusInternalServerError)
+                        return
+                }</span>
+
+                // Step 4: copy payload to response writer
+                <span class="cov0" title="0">copyHeader(w.Header(), response.Header)
+                w.WriteHeader(response.StatusCode)
+                io.Copy(w, response.Body)
+                response.Body.Close()</span>
+        }
+}
+
+func (a *App) createQueryParams(r *http.Request, route Route) (map[string]interface{}, error) <span class="cov0" title="0">{
+        params := make(map[string]interface{})
+
+        reqVars := mux.Vars(r)
+        for k, v := range reqVars </span><span class="cov0" title="0">{
+                params[k] = v
+        }</span>
+
+        <span class="cov0" title="0">for k, t := range route.GraphQL.Types </span><span class="cov0" title="0">{
+                if val, ok := params[k]; ok </span><span class="cov0" title="0">{
+                        switch t </span>{
+                        case "Bool":<span class="cov0" title="0">
+                                f, err := strconv.ParseBool(reqVars[k])
+                                if err == nil </span><span class="cov0" title="0">{
+                                        params[k] = f
+                                }</span> else<span class="cov0" title="0"> {
+                                        return nil, fmt.Errorf("cannot convert value '%s' for key '%s' into type '%s'", val, k, t)
+                                }</span>
+                        case "Float":<span class="cov0" title="0">
+                                f, err := strconv.ParseFloat(reqVars[k], 64)
+                                if err == nil </span><span class="cov0" title="0">{
+                                        params[k] = f
+                                }</span> else<span class="cov0" title="0"> {
+                                        return nil, fmt.Errorf("cannot convert value '%s' for key '%s' into type '%s'", val, k, t)
+                                }</span>
+                        case "Int":<span class="cov0" title="0">
+                                f, err := strconv.ParseInt(reqVars[k], 10, 64)
+                                if err == nil </span><span class="cov0" title="0">{
+                                        params[k] = f
+                                }</span> else<span class="cov0" title="0"> {
+                                        return nil, fmt.Errorf("cannot convert value '%s' for key '%s' into type '%s'", val, k, t)
+                                }</span>
+                        default:<span class="cov0" title="0">
+                                continue</span>
+                        }
+                }
+        }
+
+        <span class="cov0" title="0">return params, nil</span>
+}
+
+func traceCallsMiddleware(next http.Handler) http.Handler <span class="cov0" title="0">{
+        fn := func(w http.ResponseWriter, r *http.Request) </span><span class="cov0" title="0">{
+                klog.InfoS("Handling request", "uri", r.RequestURI, "method", r.Method, "#headers", len(r.Header))
+                next.ServeHTTP(w, r)
+        }</span>
+
+        <span class="cov0" title="0">return http.HandlerFunc(fn)</span>
+}
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package app
+
+import (
+        "fmt"
+        "gopkg.in/yaml.v2"
+        "io/ioutil"
+        "os"
+        "path/filepath"
+)
+
+type Route struct {
+        HTTP struct {
+                URI    string `yaml:"uri"`
+                Method string `yaml:"method"`
+        } `yaml:"http"`
+        GraphQL struct {
+                Endpoint string            `yaml:"endpoint"`
+                Query    string            `yaml:"query"`
+                Types    map[string]string `yaml:"types"`
+        } `yaml:"graphql"`
+}
+
+type routesConfig struct {
+        Routes []Route `yaml:"routes"`
+}
+
+func isYaml(path string) bool <span class="cov8" title="1">{
+        ext := filepath.Ext(path)
+        hasYamlExt := ext == ".yaml" || ext == ".yml"
+        return hasYamlExt
+}</span>
+
+func (a *App) LoadRoutesFromFiles() ([]Route, error) <span class="cov8" title="1">{
+        routes := make([]Route, 0, PreAllocatedRoutesNumber)
+
+        err := filepath.Walk(a.RouterConfigsPath, func(path string, info os.FileInfo, err error) error </span><span class="cov8" title="1">{
+                if err != nil </span><span class="cov8" title="1">{
+                        return err
+                }</span>
+                <span class="cov8" title="1">if info != nil &amp;&amp; !info.IsDir() &amp;&amp; len(path) &gt; 0 &amp;&amp; isYaml(path) </span><span class="cov8" title="1">{
+                        file, fileErr := ioutil.ReadFile(path)
+                        if fileErr != nil </span><span class="cov0" title="0">{
+                                return fmt.Errorf("error reading file: %s. %v", path, fileErr)
+                        }</span>
+
+                        <span class="cov8" title="1">var fileConfig routesConfig
+                        ymlErr := yaml.Unmarshal(file, &amp;fileConfig)
+                        if ymlErr != nil </span><span class="cov0" title="0">{
+                                return fmt.Errorf("error decoding yaml @ file: %s. %v", path, fileErr)
+                        }</span>
+
+                        <span class="cov8" title="1">routes = append(routes, fileConfig.Routes...)</span>
+                }
+                <span class="cov8" title="1">return nil</span>
+        })
+
+        <span class="cov8" title="1">return routes, err</span>
+}
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package helpers
+
+import (
+        "github.com/spf13/viper"
+        "os"
+)
+
+func GetEnvVar(key string, defValue string) string <span class="cov8" title="1">{
+        value, ok := os.LookupEnv(key)
+        if ok </span><span class="cov8" title="1">{
+                return value
+        }</span>
+
+        <span class="cov8" title="1">value, ok = viper.Get(key).(string)
+
+        if ok </span><span class="cov8" title="1">{
+                return value
+        }</span>
+
+        <span class="cov8" title="1">return defValue</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
