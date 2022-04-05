@@ -61,7 +61,7 @@
 				
 				<option value="file2">github.com/eaceto/ReGraphQL/app/http.go (0.0%)</option>
 				
-				<option value="file3">github.com/eaceto/ReGraphQL/app/routes.go (88.9%)</option>
+				<option value="file3">github.com/eaceto/ReGraphQL/app/routes.go (84.4%)</option>
 				
 				<option value="file4">github.com/eaceto/ReGraphQL/helpers/environment.go (100.0%)</option>
 				
@@ -315,6 +315,7 @@ import (
         "fmt"
         "gopkg.in/yaml.v2"
         "io/ioutil"
+        "k8s.io/klog/v2"
         "os"
         "path/filepath"
 )
@@ -344,12 +345,22 @@ func isYaml(path string) bool <span class="cov8" title="1">{
 func (a *App) LoadRoutesFromFiles() ([]Route, error) <span class="cov8" title="1">{
         routes := make([]Route, 0, PreAllocatedRoutesNumber)
 
-        err := filepath.Walk(a.RouterConfigsPath, func(path string, info os.FileInfo, err error) error </span><span class="cov8" title="1">{
+        if a.DebugEnabled </span><span class="cov8" title="1">{
+                klog.Infof("Walking config files path: `%s`", a.RouterConfigsPath)
+        }</span>
+        <span class="cov8" title="1">err := filepath.Walk(a.RouterConfigsPath, func(path string, info os.FileInfo, err error) error </span><span class="cov8" title="1">{
                 if err != nil </span><span class="cov8" title="1">{
-                        return err
-                }</span>
+                        if a.DebugEnabled </span><span class="cov8" title="1">{
+                                klog.Errorf("Error walking config files path: `%s`", a.RouterConfigsPath)
+                        }</span>
+                        <span class="cov8" title="1">return err</span>
+                }
+
                 <span class="cov8" title="1">if info != nil &amp;&amp; !info.IsDir() &amp;&amp; len(path) &gt; 0 &amp;&amp; isYaml(path) </span><span class="cov8" title="1">{
-                        file, fileErr := ioutil.ReadFile(path)
+                        if a.DebugEnabled </span><span class="cov8" title="1">{
+                                klog.Infof("Reading file: `%s`", path)
+                        }</span>
+                        <span class="cov8" title="1">file, fileErr := ioutil.ReadFile(path)
                         if fileErr != nil </span><span class="cov0" title="0">{
                                 return fmt.Errorf("error reading file: %s. %v", path, fileErr)
                         }</span>
@@ -361,9 +372,21 @@ func (a *App) LoadRoutesFromFiles() ([]Route, error) <span class="cov8" title="1
                         }</span>
 
                         <span class="cov8" title="1">routes = append(routes, fileConfig.Routes...)</span>
+                } else<span class="cov8" title="1"> if info != nil &amp;&amp; info.IsDir() </span><span class="cov8" title="1">{
+                        if a.DebugEnabled </span><span class="cov8" title="1">{
+                                klog.Infof("Found directory: `%s`", info.Name())
+                        }</span>
+                } else<span class="cov0" title="0"> if !isYaml(path) </span><span class="cov0" title="0">{
+                        if a.DebugEnabled </span><span class="cov0" title="0">{
+                                klog.Warningf("Found non-yaml file: `%s`", path)
+                        }</span>
                 }
                 <span class="cov8" title="1">return nil</span>
         })
+
+        <span class="cov8" title="1">if err != nil &amp;&amp; a.DebugEnabled </span><span class="cov8" title="1">{
+                klog.Errorf("Error walking config files path: `%s`", a.RouterConfigsPath)
+        }</span>
 
         <span class="cov8" title="1">return routes, err</span>
 }

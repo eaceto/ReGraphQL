@@ -4,7 +4,7 @@ github.com/eaceto/ReGraphQL/app/http.go:20:		GetServiceHTTPRouter	0.0%
 github.com/eaceto/ReGraphQL/app/http.go:36:		createHandler		0.0%
 github.com/eaceto/ReGraphQL/app/http.go:83:		createQueryParams	0.0%
 github.com/eaceto/ReGraphQL/app/http.go:124:		traceCallsMiddleware	0.0%
-github.com/eaceto/ReGraphQL/app/routes.go:27:		isYaml			100.0%
-github.com/eaceto/ReGraphQL/app/routes.go:33:		LoadRoutesFromFiles	86.7%
+github.com/eaceto/ReGraphQL/app/routes.go:28:		isYaml			100.0%
+github.com/eaceto/ReGraphQL/app/routes.go:34:		LoadRoutesFromFiles	82.8%
 github.com/eaceto/ReGraphQL/helpers/environment.go:8:	GetEnvVar		100.0%
-total:							(statements)		36.6%
+total:							(statements)		41.3%
