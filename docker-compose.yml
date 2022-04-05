@@ -3,11 +3,14 @@ version: "3.9"  # optional since v1.27.0
 services:
   proxy:
     build: .
+    environment:
+      - DEBUG=1
+      - TRACE_CALLS=1
     ports:
       - "8080:8080"
     volumes:
-      - type: volume
-        source: config
+      - type: bind
+        source: /tmp/config
         target: /data/config
         read_only: true
 volumes:

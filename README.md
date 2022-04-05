@@ -43,10 +43,16 @@ query($person: StarWarsPeople!) {
 
 **To**
 ````http request
-GET /person/:person
+GET /persons/{person}
 ````
 
-## How to
+## Index
+* [Quick start](#quick-start)
+* [Contributing](#contributing)
+* [License](#license)
+* [Author](#author)
+
+### Quick start
 
 1. Describe a route in a file using **yaml**, which matches your HTTP endpoint with your GraphQL endpoint and Query 
 
@@ -86,10 +92,25 @@ routes:
                   }
               }
 ````
+*File* **starwars.yml**
 
-2. Run the service (with Docker, for example)
+2. Copy **starwars.yml** into **/tmp/config**
+
+3. Run the service (using Docker Compose)
 ````shell
-docker run --rm -p 8080:8080 .
+[sudo] docker-compose up
 ````
 
 4. Query your new HTTP endpoint!
+````shell
+curl 'http://127.0.0.1:8080/graphql/persons/lukeskywalker' --compressed
+````
+
+### Contributing
+Before contributing to ReGraphQL, please read the instructions detailed in our [contribution guide](CONTRIBUTING.md).
+
+### License
+ReGraphQL is released under the MIT license. See [LICENSE](LICENSE) for details.
+
+### Author
+Created by [Ezequiel (Kimi) Aceto](https://eaceto.dev).

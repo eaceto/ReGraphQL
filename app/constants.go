@@ -1,3 +1,5 @@
+// Copyright 2021 Ezequiel (Kimi) Aceto. All rights reserved.
+
 package app
 
 const (
@@ -7,7 +9,7 @@ const (
 	ServerHostDefaultValue = ""
 
 	ServerPortKey          = "SERVER_PORT"
-	ServerPortDefaultValue = "8080"
+	ServerPortDefaultValue = 8080
 
 	ServicePathKey          = "SERVICE_PATH"
 	ServicePathDefaultValue = "/graphql"
@@ -17,7 +19,7 @@ const (
 	ServerTimeoutDefaultValue = "120"
 
 	RouterConfigPathKey          = "ROUTER_CONFIG_PATH"
-	RouterConfigPathDefaultValue = "/data/config"
+	RouterConfigPathDefaultValue = "/data/config/"
 
 	TraceCallsKey          = "TRACE_CALLS"
 	TraceCallsDefaultValue = "0"

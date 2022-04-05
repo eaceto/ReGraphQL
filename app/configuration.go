@@ -1,3 +1,5 @@
+// Copyright 2021 Ezequiel (Kimi) Aceto. All rights reserved.
+
 package app
 
 import (
@@ -34,7 +36,7 @@ func NewApp() (*App, error) {
 		return nil, fmt.Errorf("invalid %s value: '%v'", ServerHostKey, serverHost)
 	}
 
-	serverPort := helpers.GetEnvVar(ServerPortKey, ServerPortDefaultValue)
+	serverPort := helpers.GetEnvVar(ServerPortKey, fmt.Sprint(ServerPortDefaultValue))
 	if _, err := strconv.ParseUint(serverPort, 10, 32); err != nil {
 		return nil, fmt.Errorf("invalid %s value: '%v'. %v", ServerPortKey, serverPort, err)
 	}
