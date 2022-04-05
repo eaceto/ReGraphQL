@@ -23,8 +23,8 @@ func TestSingleFileRoutes(t *testing.T) {
 	}
 
 	route1 := routes[0]
-	if route1.HTTP.URI != "/person/:person" {
-		t.Errorf("`route1.HTTP.URI == %s`, want: \"/person/:person\"", route1.HTTP.URI)
+	if route1.HTTP.URI != "/persons/{person}" {
+		t.Errorf("`route1.HTTP.URI == %s`, want: \"/persons/{person}\"", route1.HTTP.URI)
 	}
 	if route1.HTTP.Method != "GET" {
 		t.Errorf("`route1.HTTP.Method == %s`, want: \"GET\"", route1.HTTP.Method)
@@ -34,8 +34,8 @@ func TestSingleFileRoutes(t *testing.T) {
 	}
 
 	route2 := routes[1]
-	if route2.HTTP.URI != "/film/:film" {
-		t.Errorf("`route1.HTTP.URI == %s`, want: \"/film/:film\"", route1.HTTP.URI)
+	if route2.HTTP.URI != "/films/{film}" {
+		t.Errorf("`route1.HTTP.URI == %s`, want: \"/films/{film}\"", route1.HTTP.URI)
 	}
 	if route2.HTTP.Method != "GET" {
 		t.Errorf("`route1.HTTP.Method == %s`, want: \"GET\"", route1.HTTP.Method)

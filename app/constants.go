@@ -17,7 +17,7 @@ const (
 	ServerTimeoutDefaultValue = "120"
 
 	RouterConfigPathKey          = "ROUTER_CONFIG_PATH"
-	RouterConfigPathDefaultValue = "/data/config"
+	RouterConfigPathDefaultValue = "/data/config/"
 
 	TraceCallsKey          = "TRACE_CALLS"
 	TraceCallsDefaultValue = "0"

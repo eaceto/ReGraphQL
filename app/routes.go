@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"k8s.io/klog/v2"
 	"os"
 	"path/filepath"
 )
@@ -33,11 +34,21 @@ func isYaml(path string) bool {
 func (a *App) LoadRoutesFromFiles() ([]Route, error) {
 	routes := make([]Route, 0, PreAllocatedRoutesNumber)
 
+	if a.DebugEnabled {
+		klog.Infof("Walking config files path: `%s`", a.RouterConfigsPath)
+	}
 	err := filepath.Walk(a.RouterConfigsPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
+			if a.DebugEnabled {
+				klog.Errorf("Error walking config files path: `%s`", a.RouterConfigsPath)
+			}
 			return err
 		}
+
 		if info != nil && !info.IsDir() && len(path) > 0 && isYaml(path) {
+			if a.DebugEnabled {
+				klog.Infof("Reading file: `%s`", path)
+			}
 			file, fileErr := ioutil.ReadFile(path)
 			if fileErr != nil {
 				return fmt.Errorf("error reading file: %s. %v", path, fileErr)
@@ -50,9 +61,21 @@ func (a *App) LoadRoutesFromFiles() ([]Route, error) {
 			}
 
 			routes = append(routes, fileConfig.Routes...)
+		} else if info != nil && info.IsDir() {
+			if a.DebugEnabled {
+				klog.Infof("Found directory: `%s`", info.Name())
+			}
+		} else if !isYaml(path) {
+			if a.DebugEnabled {
+				klog.Warningf("Found non-yaml file: `%s`", path)
+			}
 		}
 		return nil
 	})
+
+	if err != nil && a.DebugEnabled {
+		klog.Errorf("Error walking config files path: `%s`", a.RouterConfigsPath)
+	}
 
 	return routes, err
 }
