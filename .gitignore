@@ -20,3 +20,5 @@
 # Go workspace file
 go.work
 
+# (local | default) configs of the service
+config/

@@ -1,0 +1,14 @@
+version: "3.9"  # optional since v1.27.0
+
+services:
+  proxy:
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - type: volume
+        source: config
+        target: /data/config
+        read_only: true
+volumes:
+  config:
