@@ -1,4 +1,9 @@
-// Copyright 2021 Ezequiel (Kimi) Aceto. All rights reserved.
+/*
+ * ReGraphQL - Proxy
+ * This is the proxy service of project ReGraphQL
+ *
+ * Contact: ezequiel.aceto+regraphql@gmail.com
+ */
 
 package app
 
@@ -9,13 +14,13 @@ import (
 )
 
 func TestSingleFileRoutes(t *testing.T) {
-	appConfiguration := App{
+	appConfiguration := Configuration{
 		ServerAddr:        ":8081",
 		RouterConfigsPath: "../tests/files/starwars/",
 		TraceCallsEnabled: true,
 		DebugEnabled:      true,
 	}
-	routes, err := appConfiguration.LoadRoutesFromFiles()
+	routes, err := appConfiguration.loadRoutesFromFiles()
 	if err != nil {
 		t.Errorf("Could not load routes. %v", err)
 	}
@@ -48,13 +53,13 @@ func TestSingleFileRoutes(t *testing.T) {
 }
 
 func TestMultipleFilesRoutes(t *testing.T) {
-	appConfiguration := App{
+	appConfiguration := Configuration{
 		ServerAddr:        ":8081",
 		RouterConfigsPath: "../tests/files/multiple_files",
 		TraceCallsEnabled: true,
 		DebugEnabled:      true,
 	}
-	routes, err := appConfiguration.LoadRoutesFromFiles()
+	routes, err := appConfiguration.loadRoutesFromFiles()
 	if err != nil {
 		t.Errorf("Could not load routes. %v", err)
 	}
@@ -65,13 +70,13 @@ func TestMultipleFilesRoutes(t *testing.T) {
 }
 
 func TestEmptyRoutesPath(t *testing.T) {
-	appConfiguration := App{
+	appConfiguration := Configuration{
 		ServerAddr:        ":8081",
 		RouterConfigsPath: "../tests/files/empty",
 		TraceCallsEnabled: true,
 		DebugEnabled:      true,
 	}
-	routes, err := appConfiguration.LoadRoutesFromFiles()
+	routes, err := appConfiguration.loadRoutesFromFiles()
 	if err != nil {
 		t.Errorf("Could not load routes. %v", err)
 	}
@@ -82,13 +87,13 @@ func TestEmptyRoutesPath(t *testing.T) {
 }
 
 func TestInvalidRoutesPath(t *testing.T) {
-	appConfiguration := App{
+	appConfiguration := Configuration{
 		ServerAddr:        ":8081",
 		RouterConfigsPath: "../tests/files/not_found",
 		TraceCallsEnabled: true,
 		DebugEnabled:      true,
 	}
-	_, err := appConfiguration.LoadRoutesFromFiles()
+	_, err := appConfiguration.loadRoutesFromFiles()
 
 	var pathErr *fs.PathError
 	if err != nil && errors.As(err, &pathErr) {
@@ -98,13 +103,13 @@ func TestInvalidRoutesPath(t *testing.T) {
 }
 
 func TestInvalidYaml(t *testing.T) {
-	appConfiguration := App{
+	appConfiguration := Configuration{
 		ServerAddr:        ":8081",
 		RouterConfigsPath: "../tests/files/invalid_yaml",
 		TraceCallsEnabled: true,
 		DebugEnabled:      true,
 	}
-	routes, _ := appConfiguration.LoadRoutesFromFiles()
+	routes, _ := appConfiguration.loadRoutesFromFiles()
 
 	if len(routes) != 0 {
 		t.Errorf("`len(routes) = %v`, want: 0 routes", len(routes))

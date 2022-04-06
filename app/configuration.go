@@ -1,4 +1,9 @@
-// Copyright 2021 Ezequiel (Kimi) Aceto. All rights reserved.
+/*
+ * ReGraphQL - Proxy
+ * This is the proxy service of project ReGraphQL
+ *
+ * Contact: ezequiel.aceto+regraphql@gmail.com
+ */
 
 package app
 
@@ -6,6 +11,7 @@ import (
 	"fmt"
 	"github.com/eaceto/ReGraphQL/helpers"
 	"github.com/spf13/viper"
+	"k8s.io/klog/v2"
 	"net"
 	"net/http"
 	"os"
@@ -14,7 +20,7 @@ import (
 	"time"
 )
 
-type App struct {
+type Configuration struct {
 	ServerAddr         string
 	ServicePath        string
 	ServerReadTimeout  time.Duration
@@ -25,7 +31,7 @@ type App struct {
 	HTTPClient         *http.Client
 }
 
-func NewApp() (*App, error) {
+func NewConfiguration() (*Configuration, error) {
 
 	viper.SetConfigFile(EnvironmentVariablesFile)
 	_ = viper.ReadInConfig()
@@ -49,7 +55,14 @@ func NewApp() (*App, error) {
 		servicePath = "/" + servicePath
 	}
 
-	// Parse Server configuration
+	if servicePath == HealthPath {
+		return nil, fmt.Errorf("invalid %s value: '%v' has conflicts with reserverd path: %v", ServicePathKey, servicePath, HealthPath)
+	}
+	if servicePath == MetricsPath {
+		return nil, fmt.Errorf("invalid %s value: '%v' has conflicts with reserverd path: %v", ServicePathKey, servicePath, HealthPath)
+	}
+
+	// Parse Server Configuration
 	serverReadTimeout, serverReadTimeoutError := strconv.Atoi(helpers.GetEnvVar(ServerReadTimeoutKey, ServerTimeoutDefaultValue))
 	if serverReadTimeoutError != nil || serverReadTimeout < 1 {
 		return nil, fmt.Errorf("invalid %s value: '%v'. %v", ServerReadTimeoutKey, serverReadTimeout, serverReadTimeoutError)
@@ -63,14 +76,14 @@ func NewApp() (*App, error) {
 	traceCallsEnabled := helpers.GetEnvVar(TraceCallsKey, TraceCallsDefaultValue) == "1"
 	debugEnabled := helpers.GetEnvVar(DebugKey, DebugDefaultValue) == "1"
 
-	// Parse path for the router configuration files
+	// Parse path for the router Configuration files
 	routerConfigPath := helpers.GetEnvVar(RouterConfigPathKey, RouterConfigPathDefaultValue)
 	if _, err := os.Stat(routerConfigPath); os.IsNotExist(err) {
 		return nil, fmt.Errorf("path not found: invalid %s value: '%v'", RouterConfigPathKey, routerConfigPath)
 	}
 
-	// Return application configuration
-	return &App{
+	// Return application Configuration
+	return &Configuration{
 		ServerAddr:         serverHost + ":" + serverPort,
 		ServicePath:        servicePath,
 		RouterConfigsPath:  routerConfigPath,
@@ -80,4 +93,18 @@ func NewApp() (*App, error) {
 		DebugEnabled:       debugEnabled,
 		HTTPClient:         &http.Client{Timeout: time.Duration(serverReadTimeout) * time.Second},
 	}, nil
+}
+
+func (c *Configuration) log() {
+	if !c.DebugEnabled {
+		return
+	}
+	klog.Warningln("Debug Enabled")
+
+	klog.Infof("Config files: %s\n", c.RouterConfigsPath)
+	klog.Infof("Service path: %s\n", c.ServicePath)
+
+	if c.TraceCallsEnabled {
+		klog.Infoln("TraceCalls Enabled")
+	}
 }

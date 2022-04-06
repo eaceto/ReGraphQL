@@ -1,4 +1,9 @@
-// Copyright 2021 Ezequiel (Kimi) Aceto. All rights reserved.
+/*
+ * ReGraphQL - Proxy
+ * This is the proxy service of project ReGraphQL
+ *
+ * Contact: ezequiel.aceto+regraphql@gmail.com
+ */
 
 package app
 
@@ -6,6 +11,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/eaceto/ReGraphQL/middlewares"
 	"github.com/gorilla/mux"
 	"io"
 	"k8s.io/klog/v2"
@@ -19,25 +25,32 @@ type graphQLPayload struct {
 	Variables     map[string]interface{} `json:"variables,omitempty"`
 }
 
-func (a *App) GetServiceHTTPRouter(routes []Route) (*mux.Router, error) {
-	r := mux.NewRouter().PathPrefix(a.ServicePath).Subrouter()
-	if a.TraceCallsEnabled {
-		r.Use(traceCallsMiddleware)
+func (c *Configuration) addServiceHTTPRouter(router *mux.Router, routes []Route) (*mux.Router, error) {
+	r := router.PathPrefix(c.ServicePath).Subrouter()
+
+	if c.TraceCallsEnabled {
+		r.Use(middlewares.TraceCallsMiddleware)
 	}
 
 	for idx, route := range routes {
-		if a.DebugEnabled {
+		if c.DebugEnabled {
 			klog.Infof("Loading route #%v - [%s] %s\n", idx, route.HTTP.Method, route.HTTP.URI)
 		}
-		r.HandleFunc(route.HTTP.URI, a.createHandler(route)).Methods(route.HTTP.Method)
+
+		var handler http.HandlerFunc
+		handler = middlewares.PrometheusMiddleware(c.createHandlerFunc(route))
+
+		r.HandleFunc(route.HTTP.URI, handler).
+			Name("HTTP(" + route.HTTP.URI + ")").
+			Methods(route.HTTP.Method)
 	}
 
 	return r, nil
 }
 
-func (a *App) createHandler(route Route) func(w http.ResponseWriter, r *http.Request) {
+func (c *Configuration) createHandlerFunc(route Route) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		params, err := a.createQueryParams(r, route)
+		params, err := c.createQueryParams(r, route)
 		if err != nil {
 			http.Error(w, "could not create request", http.StatusBadRequest)
 			return
@@ -68,7 +81,7 @@ func (a *App) createHandler(route Route) func(w http.ResponseWriter, r *http.Req
 		graphQLRequest.Header.Add("Content-Type", "application/json")
 		graphQLRequest.Header.Set("X-Forwarded-For", r.RemoteAddr)
 
-		response, err := a.HTTPClient.Do(graphQLRequest)
+		response, err := c.HTTPClient.Do(graphQLRequest)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -77,12 +90,12 @@ func (a *App) createHandler(route Route) func(w http.ResponseWriter, r *http.Req
 		// Step 4: copy payload to response writer
 		copyHeader(w.Header(), response.Header)
 		w.WriteHeader(response.StatusCode)
-		io.Copy(w, response.Body)
-		response.Body.Close()
+		_, _ = io.Copy(w, response.Body)
+		_ = response.Body.Close()
 	}
 }
 
-func (a *App) createQueryParams(r *http.Request, route Route) (map[string]interface{}, error) {
+func (c *Configuration) createQueryParams(r *http.Request, route Route) (map[string]interface{}, error) {
 	params := make(map[string]interface{})
 
 	reqVars := mux.Vars(r)
@@ -121,13 +134,4 @@ func (a *App) createQueryParams(r *http.Request, route Route) (map[string]interf
 	}
 
 	return params, nil
-}
-
-func traceCallsMiddleware(next http.Handler) http.Handler {
-	fn := func(w http.ResponseWriter, r *http.Request) {
-		klog.InfoS("Handling request", "uri", r.RequestURI, "method", r.Method, "#headers", len(r.Header))
-		next.ServeHTTP(w, r)
-	}
-
-	return http.HandlerFunc(fn)
 }
