@@ -1,9 +1,15 @@
-// Copyright 2021 Ezequiel (Kimi) Aceto. All rights reserved.
+/*
+ * ReGraphQL - Proxy
+ * This is the proxy service of project ReGraphQL
+ *
+ * Contact: ezequiel.aceto+regraphql@gmail.com
+ */
 
 package app
 
 import (
 	"fmt"
+	"github.com/gorilla/mux"
 	"strconv"
 	"testing"
 	"time"
@@ -12,12 +18,14 @@ import (
 func TestDefaultConfig(t *testing.T) {
 	testConfigPath := "../tests/files/starwars/"
 	t.Setenv(RouterConfigPathKey, testConfigPath) // Avoid an error as config directory does not exists
-	config, err := NewApp()
+	application, err := NewApplication(mux.NewRouter())
 
 	if err != nil {
 		t.Error(err)
 		return
 	}
+
+	config := application.Configuration
 
 	if config.DebugEnabled != false {
 		t.Errorf("Debug should be disabled by default ")

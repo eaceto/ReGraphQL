@@ -1,4 +1,9 @@
-// Copyright 2021 Ezequiel (Kimi) Aceto. All rights reserved.
+/*
+ * ReGraphQL - Proxy
+ * This is the proxy service of project ReGraphQL
+ *
+ * Contact: ezequiel.aceto+regraphql@gmail.com
+ */
 
 package app
 
@@ -33,22 +38,22 @@ func isYaml(path string) bool {
 	return hasYamlExt
 }
 
-func (a *App) LoadRoutesFromFiles() ([]Route, error) {
+func (c *Configuration) loadRoutesFromFiles() ([]Route, error) {
 	routes := make([]Route, 0, PreAllocatedRoutesNumber)
 
-	if a.DebugEnabled {
-		klog.Infof("Walking config files path: `%s`", a.RouterConfigsPath)
+	if c.DebugEnabled {
+		klog.Infof("Walking config files path: `%s`", c.RouterConfigsPath)
 	}
-	err := filepath.Walk(a.RouterConfigsPath, func(path string, info os.FileInfo, err error) error {
+	err := filepath.Walk(c.RouterConfigsPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			if a.DebugEnabled {
-				klog.Errorf("Error walking config files path: `%s`", a.RouterConfigsPath)
+			if c.DebugEnabled {
+				klog.Errorf("Error walking config files path: `%s`", c.RouterConfigsPath)
 			}
 			return err
 		}
 
 		if info != nil && !info.IsDir() && len(path) > 0 && isYaml(path) {
-			if a.DebugEnabled {
+			if c.DebugEnabled {
 				klog.Infof("Reading file: `%s`", path)
 			}
 			file, fileErr := ioutil.ReadFile(path)
@@ -64,19 +69,19 @@ func (a *App) LoadRoutesFromFiles() ([]Route, error) {
 
 			routes = append(routes, fileConfig.Routes...)
 		} else if info != nil && info.IsDir() {
-			if a.DebugEnabled {
+			if c.DebugEnabled {
 				klog.Infof("Found directory: `%s`", info.Name())
 			}
 		} else if !isYaml(path) {
-			if a.DebugEnabled {
+			if c.DebugEnabled {
 				klog.Warningf("Found non-yaml file: `%s`", path)
 			}
 		}
 		return nil
 	})
 
-	if err != nil && a.DebugEnabled {
-		klog.Errorf("Error walking config files path: `%s`", a.RouterConfigsPath)
+	if err != nil && c.DebugEnabled {
+		klog.Errorf("Error walking config files path: `%s`", c.RouterConfigsPath)
 	}
 
 	return routes, err

@@ -57,6 +57,7 @@ GET /persons/{person}
 # Index
 * [Requirements](#requirements)
 * [Features](#features)
+* [Service Endpoints](#service-endpoints)
 * [Quick start](#quick-start)
 * [Docker Image](#docker-image)
 * [Contributing](#contributing)
@@ -68,7 +69,7 @@ GET /persons/{person}
 * Go 1.18
 
 ## Features
-*As per version 1.0.0*
+*As per version 1.0.1*
 
 - [x] Maps HTTP params to GraphQL Variables
 - [x] Forwards HTTP headers to GraphQL request
@@ -76,9 +77,63 @@ GET /persons/{person}
 - [x] Reads configuration from **environment variables**
 - [x] Logs using Kubernetes' [**klog**](https://github.com/kubernetes/klog) v2
 - [x] Docker Image below 20MB
-- [ ] Exposes metrics using [Prometheus](https://prometheus.io/)
-- [ ] Exposes Liveness, Readiness and Startup Probes 
+- [X] Exposes metrics using [Prometheus](https://prometheus.io/)
+- [X] Exposes Liveness, Readiness and Startup Probes 
 - [ ] Implements Hot reload for routes
+
+## Service Endpoints
+
+### Liveness
+
+````http request
+GET /health/liveness
+
+{"hostname":"pod_67804","status":"up"}
+````
+
+Returns HTTP Status Code **OK** (200) with the following JSON as soon as the application starts
+````json
+{"hostname":"<< hostname >>","status":"up"}
+````
+
+### Readiness
+
+````http request
+GET /health/readiness
+
+{"hostname":"pod_67804","status":"ready"}
+````
+
+1. If the application is **Ready** to receive requests
+
+Returns HTTP Status Code **OK** (200) with the following JSON:
+````json
+{"hostname":"<< hostname >>","status":"ready"}
+````
+
+2. If the application is **Not Ready** to receive requests
+
+Returns HTTP Status Code **Precondition Failed** (412) with the following JSON:
+````json
+{"hostname":"<< hostname >>","status":"waiting"}
+````
+
+### Metrics
+
+The service exposes a [Prometheus](https://prometheus.io/) metrics endpoint at **/metrics**
+
+````http request
+GET /metrics
+
+# HELP go_gc_duration_seconds A summary of the pause duration of garbage collection cycles.
+# TYPE go_gc_duration_seconds summary
+go_gc_duration_seconds{quantile="0"} 0
+go_gc_duration_seconds{quantile="0.25"} 0
+go_gc_duration_seconds{quantile="0.5"} 0
+go_gc_duration_seconds{quantile="0.75"} 0
+go_gc_duration_seconds{quantile="1"} 0
+go_gc_duration_seconds_sum 0
+````
 
 ## Quick start
 
