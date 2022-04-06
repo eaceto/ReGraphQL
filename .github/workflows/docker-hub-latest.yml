@@ -1,6 +1,7 @@
 name: Build and publish latest image on Docker Hub
 
 on:
+  workflow_dispatch: 
   pull_request:
     branches: main
   push:
@@ -41,7 +42,7 @@ jobs:
             --build-arg CI_VERSION=latest \
             --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
             --build-arg SCM_REF=${GITHUB_SHA::8} \
-            ${TAGS} --file ./Dockerfile
+            ${TAGS} .
 
       - name: Install buildx
         id: buildx
