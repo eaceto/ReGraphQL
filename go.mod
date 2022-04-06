@@ -7,7 +7,6 @@ require (
 	github.com/prometheus/client_golang v1.11.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.9.0
-	github.com/urfave/negroni v1.0.0
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/klog/v2 v2.60.1
 )

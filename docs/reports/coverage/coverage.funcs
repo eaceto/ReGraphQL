@@ -7,6 +7,6 @@ github.com/eaceto/ReGraphQL/app/http.go:51:		createHandlerFunc	3.8%
 github.com/eaceto/ReGraphQL/app/http.go:98:		createQueryParams	0.0%
 github.com/eaceto/ReGraphQL/app/routes.go:35:		isYaml			100.0%
 github.com/eaceto/ReGraphQL/app/routes.go:41:		loadRoutesFromFiles	82.8%
-github.com/eaceto/ReGraphQL/helpers/environment.go:19:	GetEnvVar		100.0%
+github.com/eaceto/ReGraphQL/helpers/environment.go:20:	GetEnvVar		100.0%
 github.com/eaceto/ReGraphQL/helpers/http.go:15:		LogEndpoints		0.0%
 total:							(statements)		46.5%
