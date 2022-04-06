@@ -1,4 +1,9 @@
-// Copyright 2021 Ezequiel (Kimi) Aceto. All rights reserved.
+/*
+ * ReGraphQL - Proxy
+ * This is the proxy service of project ReGraphQL
+ *
+ * Contact: ezequiel.aceto+regraphql@gmail.com
+ */
 
 package helpers
 
@@ -7,10 +12,11 @@ import (
 	"os"
 )
 
-// Returns an environment varible if available, if not its defaultValue
+// GetEnvVar Returns an environment variable's value if available, if not its defaultValue
 // Lookup table:
-// - Environment
-// - Argument (vipe)
+// - Environment (os)
+// - Argument (viper)
+// - Default Value (param)
 func GetEnvVar(key string, defaultValue string) string {
 	value, ok := os.LookupEnv(key)
 	if ok {
