@@ -25,16 +25,24 @@ FROM gcr.io/distroless/static
 ARG CI_NAME=local
 ENV CI_NAME=${CI_NAME}
 
-ARG CI_VERSION=latest
+ARG CI_VERSION=none
 ENV CI_VERSION=${CI_VERSION}
 
+ARG SCM_REF=none
+ENV SCM_REF=${SCM_REF}
+
+ARG BUILD_DATE=none
+ENV BUILD_DATE=${BUILD_DATE}
+
 LABEL org.opencontainers.image.title="ReGraphQL"
+LABEL org.opencontainers.image.created="${BUILD_DATE}"
 LABEL org.opencontainers.image.description="A simple (yet effective) REST / HTTP to GraphQL router"
 LABEL org.opencontainers.image.authors="ezequiel.aceto+regraphql@gmail.com"
 LABEL org.opencontainers.image.url="https://hub.docker.com/repository/docker/eaceto/regraphql"
 LABEL org.opencontainers.image.source="https://github.com/eaceto/ReGraphQL"
 LABEL org.opencontainers.image.version="1.0.1"
 LABEL dev.eaceto.regraphql.image.ci.name="${CI_NAME}"
+LABEL dev.eaceto.regraphql.image.scm.ref="${SCM_REF}"
 LABEL dev.eaceto.regraphql.image.ci.version="${CI_VERSION}"
 LABEL dev.eaceto.regraphql.health="http://localhost:8080/health/liveness"
 
