@@ -10,7 +10,7 @@ services:
       - "8080:8080"
     volumes:
       - type: bind
-        source: config
+        source: /tmp/config
         target: /data/config
         read_only: true
 volumes:

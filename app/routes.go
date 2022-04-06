@@ -1,3 +1,5 @@
+// Copyright 2021 Ezequiel (Kimi) Aceto. All rights reserved.
+
 package app
 
 import (

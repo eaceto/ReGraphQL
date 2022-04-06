@@ -77,7 +77,9 @@
 		</div>
 		<div id="content">
 		
-		<pre class="file" id="file0" style="display: none">package app
+		<pre class="file" id="file0" style="display: none">// Copyright 2021 Ezequiel (Kimi) Aceto. All rights reserved.
+
+package app
 
 import (
         "fmt"
@@ -113,7 +115,7 @@ func NewApp() (*App, error) <span class="cov8" title="1">{
                 return nil, fmt.Errorf("invalid %s value: '%v'", ServerHostKey, serverHost)
         }</span>
 
-        <span class="cov8" title="1">serverPort := helpers.GetEnvVar(ServerPortKey, ServerPortDefaultValue)
+        <span class="cov8" title="1">serverPort := helpers.GetEnvVar(ServerPortKey, fmt.Sprint(ServerPortDefaultValue))
         if _, err := strconv.ParseUint(serverPort, 10, 32); err != nil </span><span class="cov0" title="0">{
                 return nil, fmt.Errorf("invalid %s value: '%v'. %v", ServerPortKey, serverPort, err)
         }</span>
@@ -160,7 +162,9 @@ func NewApp() (*App, error) <span class="cov8" title="1">{
 }
 </pre>
 		
-		<pre class="file" id="file1" style="display: none">package app
+		<pre class="file" id="file1" style="display: none">// Copyright 2021 Ezequiel (Kimi) Aceto. All rights reserved.
+
+package app
 
 import (
         "net/http"
@@ -176,7 +180,9 @@ func copyHeader(dst, src http.Header) <span class="cov0" title="0">{
 }
 </pre>
 		
-		<pre class="file" id="file2" style="display: none">package app
+		<pre class="file" id="file2" style="display: none">// Copyright 2021 Ezequiel (Kimi) Aceto. All rights reserved.
+
+package app
 
 import (
         "bytes"
@@ -309,7 +315,9 @@ func traceCallsMiddleware(next http.Handler) http.Handler <span class="cov0" tit
 }
 </pre>
 		
-		<pre class="file" id="file3" style="display: none">package app
+		<pre class="file" id="file3" style="display: none">// Copyright 2021 Ezequiel (Kimi) Aceto. All rights reserved.
+
+package app
 
 import (
         "fmt"
@@ -392,14 +400,20 @@ func (a *App) LoadRoutesFromFiles() ([]Route, error) <span class="cov8" title="1
 }
 </pre>
 		
-		<pre class="file" id="file4" style="display: none">package helpers
+		<pre class="file" id="file4" style="display: none">// Copyright 2021 Ezequiel (Kimi) Aceto. All rights reserved.
+
+package helpers
 
 import (
         "github.com/spf13/viper"
         "os"
 )
 
-func GetEnvVar(key string, defValue string) string <span class="cov8" title="1">{
+// Returns an environment varible if available, if not its defaultValue
+// Lookup table:
+// - Environment
+// - Argument (vipe)
+func GetEnvVar(key string, defaultValue string) string <span class="cov8" title="1">{
         value, ok := os.LookupEnv(key)
         if ok </span><span class="cov8" title="1">{
                 return value
@@ -411,7 +425,7 @@ func GetEnvVar(key string, defValue string) string <span class="cov8" title="1">
                 return value
         }</span>
 
-        <span class="cov8" title="1">return defValue</span>
+        <span class="cov8" title="1">return defaultValue</span>
 }
 </pre>
 		

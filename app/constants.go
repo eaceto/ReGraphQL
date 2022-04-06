@@ -1,3 +1,5 @@
+// Copyright 2021 Ezequiel (Kimi) Aceto. All rights reserved.
+
 package app
 
 const (
@@ -7,7 +9,7 @@ const (
 	ServerHostDefaultValue = ""
 
 	ServerPortKey          = "SERVER_PORT"
-	ServerPortDefaultValue = "8080"
+	ServerPortDefaultValue = 8080
 
 	ServicePathKey          = "SERVICE_PATH"
 	ServicePathDefaultValue = "/graphql"

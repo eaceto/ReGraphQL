@@ -1,6 +1,9 @@
+// Copyright 2021 Ezequiel (Kimi) Aceto. All rights reserved.
+
 package app
 
 import (
+	"fmt"
 	"strconv"
 	"testing"
 	"time"
@@ -25,8 +28,8 @@ func TestDefaultConfig(t *testing.T) {
 	if config.RouterConfigsPath != testConfigPath {
 		t.Errorf("`config.RouterConfigsPath = %s`, want: \"%s\"", config.RouterConfigsPath, testConfigPath)
 	}
-	if config.ServerAddr != ServerHostDefaultValue+":"+ServerPortDefaultValue {
-		t.Errorf("`config.ServerAddr = %s`, want: \"%s\"", config.ServerAddr, ServerHostDefaultValue+":"+ServerPortDefaultValue)
+	if config.ServerAddr != ServerHostDefaultValue+":"+fmt.Sprint(ServerPortDefaultValue) {
+		t.Errorf("`config.ServerAddr = %s`, want: \"%s\"", config.ServerAddr, ServerHostDefaultValue+":"+fmt.Sprint(ServerPortDefaultValue))
 	}
 
 	timeout, _ := strconv.ParseUint(ServerTimeoutDefaultValue, 10, 32)

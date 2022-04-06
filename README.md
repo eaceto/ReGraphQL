@@ -94,11 +94,11 @@ routes:
 ````
 *File* **starwars.yml**
 
-2. Copy **starwars.yml** into **./config**
+2. Copy **starwars.yml** into **/tmp/config**
 
 3. Run the service (using Docker Compose)
 ````shell
-docker-compose up
+[sudo] docker-compose up
 ````
 
 4. Query your new HTTP endpoint!

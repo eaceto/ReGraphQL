@@ -1,9 +1,13 @@
+// Copyright 2021 Ezequiel (Kimi) Aceto. All rights reserved.
+
 package main
 
 import (
 	"flag"
 	"github.com/eaceto/ReGraphQL/app"
 	"github.com/gorilla/mux"
+	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
 	"k8s.io/klog/v2"
 	"net/http"
 	"os"
@@ -23,6 +27,13 @@ func main() {
 	klog.InitFlags(nil) // initializing the flags
 	flag.Parse()
 	defer klog.Flush()
+
+	flag.String(app.ServerHostKey, app.ServerHostDefaultValue, "Server host")
+	flag.Int(app.ServerPortKey, app.ServerPortDefaultValue, "Server port")
+
+	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
+	pflag.Parse()
+	viper.BindPFlags(pflag.CommandLine)
 
 	app, err := app.NewApp()
 	if err != nil {

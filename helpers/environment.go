@@ -1,3 +1,5 @@
+// Copyright 2021 Ezequiel (Kimi) Aceto. All rights reserved.
+
 package helpers
 
 import (
@@ -5,7 +7,11 @@ import (
 	"os"
 )
 
-func GetEnvVar(key string, defValue string) string {
+// Returns an environment varible if available, if not its defaultValue
+// Lookup table:
+// - Environment
+// - Argument (vipe)
+func GetEnvVar(key string, defaultValue string) string {
 	value, ok := os.LookupEnv(key)
 	if ok {
 		return value
@@ -17,5 +23,5 @@ func GetEnvVar(key string, defValue string) string {
 		return value
 	}
 
-	return defValue
+	return defaultValue
 }
