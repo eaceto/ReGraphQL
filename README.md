@@ -1,4 +1,12 @@
 # ReGraphQL
+
+![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/eaceto/ReGraphQL)
+
+![Docker Image Version (latest semver)](https://img.shields.io/docker/v/eaceto/regraphql?color=red&label=Docker%20Image%20version)
+![Docker Image Size (latest semver)](https://img.shields.io/docker/image-size/eaceto/regraphql?color=red&label=Docker%20Image%20size)
+
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/eaceto/ReGraphQL/Go?label=GitHub%20CI)
+
 **A simple (yet effective) REST / HTTP to GraphQL router**
 
 ReGraphQL helps you expose REST/HTTP endpoints and route it to a GraphQL endpoints.
@@ -46,13 +54,33 @@ query($person: StarWarsPeople!) {
 GET /persons/{person}
 ````
 
-## Index
+# Index
+* [Requirements](#requirements)
+* [Features](#features)
 * [Quick start](#quick-start)
+* [Docker Image](#docker-image)
 * [Contributing](#contributing)
 * [License](#license)
 * [Author](#author)
 
-### Quick start
+## Requirements
+
+* Go 1.18
+
+## Features
+*As per version 1.0.0*
+
+- [x] Maps HTTP params to GraphQL Variables
+- [x] Forwards HTTP headers to GraphQL request
+- [x] Reads configuration from **.env** file
+- [x] Reads configuration from **environment variables**
+- [x] Logs using Kubernetes' [**klog**](https://github.com/kubernetes/klog) v2
+- [x] Docker Image below 20MB
+- [ ] Exposes metrics using [Prometheus](https://prometheus.io/)
+- [ ] Exposes Liveness, Readiness and Startup Probes 
+- [ ] Implements Hot reload for routes
+
+## Quick start
 
 1. Describe a route in a file using **yaml**, which matches your HTTP endpoint with your GraphQL endpoint and Query 
 
@@ -106,11 +134,18 @@ routes:
 curl 'http://127.0.0.1:8080/graphql/persons/lukeskywalker' --compressed
 ````
 
-### Contributing
+## Docker Image
+Docker image is based on Google's Distroless. The final image is around 11.2MB and packs only the necessary things to run the service.
+
+````shell
+docker pull eaceto/regraphql:1.0.0
+````
+
+## Contributing
 Before contributing to ReGraphQL, please read the instructions detailed in our [contribution guide](CONTRIBUTING.md).
 
-### License
+## License
 ReGraphQL is released under the MIT license. See [LICENSE](LICENSE) for details.
 
-### Author
+## Author
 Created by [Ezequiel (Kimi) Aceto](https://eaceto.dev).
