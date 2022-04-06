@@ -510,10 +510,11 @@ import (
         "os"
 )
 
-// Returns an environment varible if available, if not its defaultValue
+// GetEnvVar Returns an environment variable's value if available, if not its defaultValue
 // Lookup table:
-// - Environment
-// - Argument (vipe)
+// - Environment (os)
+// - Argument (viper)
+// - Default Value (param)
 func GetEnvVar(key string, defaultValue string) string <span class="cov8" title="1">{
         value, ok := os.LookupEnv(key)
         if ok </span><span class="cov8" title="1">{
