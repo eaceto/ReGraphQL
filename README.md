@@ -69,7 +69,6 @@ GET /persons/{person}
 * Go 1.18
 
 ## Features
-*As per version 1.0.1*
 
 - [x] Maps HTTP params to GraphQL Variables
 - [x] Forwards HTTP headers to GraphQL request
@@ -193,7 +192,7 @@ curl 'http://127.0.0.1:8080/graphql/persons/lukeskywalker' --compressed
 Docker image is based on Google's Distroless. The final image is around 11.2MB and packs only the necessary things to run the service.
 
 ````shell
-docker pull eaceto/regraphql:1.0.1
+docker pull eaceto/regraphql:latest
 ````
 
 ## Contributing
