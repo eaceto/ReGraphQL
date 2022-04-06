@@ -44,11 +44,15 @@ jobs:
             --build-arg SCM_REF=${GITHUB_SHA::8} \
             ${TAGS} .
 
-      - name: Install buildx
-        id: buildx
-        uses: crazy-max/ghaction-docker-buildx@v3
+      # https://github.com/docker/setup-qemu-action
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      # https://github.com/docker/setup-buildx-action
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
         with:
-          buildx-version: latest
+          install: true
 
       - name: Login to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
