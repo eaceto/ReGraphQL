@@ -1,0 +1,26 @@
+name: Build and publish latest image on Docker Hub
+
+on:
+  push:
+    branches: main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Install buildx
+        id: buildx
+        uses: crazy-max/ghaction-docker-buildx@v1
+        with:
+          version: latest
+      - name: Login to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+      - name: Build and Push to Docker Hub
+        run: |
+          docker buildx build --push \
+          --build-arg CI_NAME=github-action
+          --build-arg CI_VERSION=latest          
+          --tag eaceto/regraphql:latest \
+          --platform linux/arm/v7,linux/arm64/v8,linux/386,linux/amd64 .
