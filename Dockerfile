@@ -22,13 +22,17 @@ RUN go build -o /go/bin/app
 # We don't use /base because we don't need OpenSSL, libSSL and glibc
 FROM gcr.io/distroless/static
 
+ARG CI_NAME=local
+ENV CI_NAME=${CI_NAME}
+
 LABEL org.opencontainers.image.title="ReGraphQL"
 LABEL org.opencontainers.image.description="A simple (yet effective) REST / HTTP to GraphQL router"
 LABEL org.opencontainers.image.authors="ezequiel.aceto+regraphql@gmail.com"
 LABEL org.opencontainers.image.url="https://hub.docker.com/repository/docker/eaceto/regraphql"
 LABEL org.opencontainers.image.source="https://github.com/eaceto/ReGraphQL"
-
 LABEL org.opencontainers.image.version="1.0.1"
+LABEL dev.eaceto.regraphql.image.ci="${CI_NAME}"
+LABEL dev.eaceto.regraphql.health="http://localhost:8080/health/liveness"
 
 COPY --from=build-env /go/bin/app /
 
