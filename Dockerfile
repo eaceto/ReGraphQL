@@ -2,10 +2,12 @@ FROM golang:1.18 AS build-env
 
 WORKDIR /go/src/app
 
-COPY app ./app
-COPY helpers ./helpers
 COPY go.mod .
 COPY main.go .
+COPY app ./app
+COPY helpers ./helpers
+COPY services ./services
+COPY middlewares ./middlewares
 
 ENV CGO_ENABLED=0
 ENV GO111MODULE=on

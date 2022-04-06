@@ -55,15 +55,19 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">github.com/eaceto/ReGraphQL/app/configuration.go (72.0%)</option>
+				<option value="file0">github.com/eaceto/ReGraphQL/app/app.go (69.2%)</option>
 				
-				<option value="file1">github.com/eaceto/ReGraphQL/app/helpers.go (0.0%)</option>
+				<option value="file1">github.com/eaceto/ReGraphQL/app/configuration.go (61.1%)</option>
 				
-				<option value="file2">github.com/eaceto/ReGraphQL/app/http.go (0.0%)</option>
+				<option value="file2">github.com/eaceto/ReGraphQL/app/helpers.go (0.0%)</option>
 				
-				<option value="file3">github.com/eaceto/ReGraphQL/app/routes.go (84.4%)</option>
+				<option value="file3">github.com/eaceto/ReGraphQL/app/http.go (15.8%)</option>
 				
-				<option value="file4">github.com/eaceto/ReGraphQL/helpers/environment.go (100.0%)</option>
+				<option value="file4">github.com/eaceto/ReGraphQL/app/routes.go (84.4%)</option>
+				
+				<option value="file5">github.com/eaceto/ReGraphQL/helpers/environment.go (100.0%)</option>
+				
+				<option value="file6">github.com/eaceto/ReGraphQL/helpers/http.go (0.0%)</option>
 				
 				</select>
 			</div>
@@ -77,7 +81,63 @@
 		</div>
 		<div id="content">
 		
-		<pre class="file" id="file0" style="display: none">// Copyright 2021 Ezequiel (Kimi) Aceto. All rights reserved.
+		<pre class="file" id="file0" style="display: none">/*
+ * ReGraphQL - Proxy
+ * This is the proxy service of project ReGraphQL
+ *
+ * Contact: ezequiel.aceto+regraphql@gmail.com
+ */
+
+package app
+
+import (
+        "fmt"
+        "github.com/gorilla/mux"
+)
+
+type Application struct {
+        Router        *mux.Router
+        Routes        []Route
+        Configuration *Configuration
+}
+
+func NewApplication(rootRouter *mux.Router) (*Application, error) <span class="cov8" title="1">{
+
+        configuration, err := NewConfiguration()
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">configuration.log()
+
+        routes, err := configuration.loadRoutesFromFiles()
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">if len(routes) == 0 </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("no routes available in config path: %s", configuration.RouterConfigsPath)
+        }</span>
+
+        <span class="cov8" title="1">router, err := configuration.addServiceHTTPRouter(rootRouter, routes)
+        if router == nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("could not create HTTP router")
+        }</span>
+
+        <span class="cov8" title="1">return &amp;Application{
+                Router:        router,
+                Routes:        routes,
+                Configuration: configuration,
+        }, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">/*
+ * ReGraphQL - Proxy
+ * This is the proxy service of project ReGraphQL
+ *
+ * Contact: ezequiel.aceto+regraphql@gmail.com
+ */
 
 package app
 
@@ -85,6 +145,7 @@ import (
         "fmt"
         "github.com/eaceto/ReGraphQL/helpers"
         "github.com/spf13/viper"
+        "k8s.io/klog/v2"
         "net"
         "net/http"
         "os"
@@ -93,7 +154,7 @@ import (
         "time"
 )
 
-type App struct {
+type Configuration struct {
         ServerAddr         string
         ServicePath        string
         ServerReadTimeout  time.Duration
@@ -104,7 +165,7 @@ type App struct {
         HTTPClient         *http.Client
 }
 
-func NewApp() (*App, error) <span class="cov8" title="1">{
+func NewConfiguration() (*Configuration, error) <span class="cov8" title="1">{
 
         viper.SetConfigFile(EnvironmentVariablesFile)
         _ = viper.ReadInConfig()
@@ -128,7 +189,14 @@ func NewApp() (*App, error) <span class="cov8" title="1">{
                 servicePath = "/" + servicePath
         }</span>
 
-        // Parse Server configuration
+        <span class="cov8" title="1">if servicePath == HealthPath </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("invalid %s value: '%v' has conflicts with reserverd path: %v", ServicePathKey, servicePath, HealthPath)
+        }</span>
+        <span class="cov8" title="1">if servicePath == MetricsPath </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("invalid %s value: '%v' has conflicts with reserverd path: %v", ServicePathKey, servicePath, HealthPath)
+        }</span>
+
+        // Parse Server Configuration
         <span class="cov8" title="1">serverReadTimeout, serverReadTimeoutError := strconv.Atoi(helpers.GetEnvVar(ServerReadTimeoutKey, ServerTimeoutDefaultValue))
         if serverReadTimeoutError != nil || serverReadTimeout &lt; 1 </span><span class="cov0" title="0">{
                 return nil, fmt.Errorf("invalid %s value: '%v'. %v", ServerReadTimeoutKey, serverReadTimeout, serverReadTimeoutError)
@@ -142,14 +210,14 @@ func NewApp() (*App, error) <span class="cov8" title="1">{
         <span class="cov8" title="1">traceCallsEnabled := helpers.GetEnvVar(TraceCallsKey, TraceCallsDefaultValue) == "1"
         debugEnabled := helpers.GetEnvVar(DebugKey, DebugDefaultValue) == "1"
 
-        // Parse path for the router configuration files
+        // Parse path for the router Configuration files
         routerConfigPath := helpers.GetEnvVar(RouterConfigPathKey, RouterConfigPathDefaultValue)
         if _, err := os.Stat(routerConfigPath); os.IsNotExist(err) </span><span class="cov0" title="0">{
                 return nil, fmt.Errorf("path not found: invalid %s value: '%v'", RouterConfigPathKey, routerConfigPath)
         }</span>
 
-        // Return application configuration
-        <span class="cov8" title="1">return &amp;App{
+        // Return application Configuration
+        <span class="cov8" title="1">return &amp;Configuration{
                 ServerAddr:         serverHost + ":" + serverPort,
                 ServicePath:        servicePath,
                 RouterConfigsPath:  routerConfigPath,
@@ -160,9 +228,28 @@ func NewApp() (*App, error) <span class="cov8" title="1">{
                 HTTPClient:         &amp;http.Client{Timeout: time.Duration(serverReadTimeout) * time.Second},
         }, nil</span>
 }
+
+func (c *Configuration) log() <span class="cov8" title="1">{
+        if !c.DebugEnabled </span><span class="cov8" title="1">{
+                return
+        }</span>
+        <span class="cov0" title="0">klog.Warningln("Debug Enabled")
+
+        klog.Infof("Config files: %s\n", c.RouterConfigsPath)
+        klog.Infof("Service path: %s\n", c.ServicePath)
+
+        if c.TraceCallsEnabled </span><span class="cov0" title="0">{
+                klog.Infoln("TraceCalls Enabled")
+        }</span>
+}
 </pre>
 		
-		<pre class="file" id="file1" style="display: none">// Copyright 2021 Ezequiel (Kimi) Aceto. All rights reserved.
+		<pre class="file" id="file2" style="display: none">/*
+ * ReGraphQL - Proxy
+ * This is the proxy service of project ReGraphQL
+ *
+ * Contact: ezequiel.aceto+regraphql@gmail.com
+ */
 
 package app
 
@@ -180,7 +267,12 @@ func copyHeader(dst, src http.Header) <span class="cov0" title="0">{
 }
 </pre>
 		
-		<pre class="file" id="file2" style="display: none">// Copyright 2021 Ezequiel (Kimi) Aceto. All rights reserved.
+		<pre class="file" id="file3" style="display: none">/*
+ * ReGraphQL - Proxy
+ * This is the proxy service of project ReGraphQL
+ *
+ * Contact: ezequiel.aceto+regraphql@gmail.com
+ */
 
 package app
 
@@ -188,6 +280,7 @@ import (
         "bytes"
         "encoding/json"
         "fmt"
+        "github.com/eaceto/ReGraphQL/middlewares"
         "github.com/gorilla/mux"
         "io"
         "k8s.io/klog/v2"
@@ -201,25 +294,32 @@ type graphQLPayload struct {
         Variables     map[string]interface{} `json:"variables,omitempty"`
 }
 
-func (a *App) GetServiceHTTPRouter(routes []Route) (*mux.Router, error) <span class="cov0" title="0">{
-        r := mux.NewRouter().PathPrefix(a.ServicePath).Subrouter()
-        if a.TraceCallsEnabled </span><span class="cov0" title="0">{
-                r.Use(traceCallsMiddleware)
+func (c *Configuration) addServiceHTTPRouter(router *mux.Router, routes []Route) (*mux.Router, error) <span class="cov8" title="1">{
+        r := router.PathPrefix(c.ServicePath).Subrouter()
+
+        if c.TraceCallsEnabled </span><span class="cov0" title="0">{
+                r.Use(middlewares.TraceCallsMiddleware)
         }</span>
 
-        <span class="cov0" title="0">for idx, route := range routes </span><span class="cov0" title="0">{
-                if a.DebugEnabled </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">for idx, route := range routes </span><span class="cov8" title="1">{
+                if c.DebugEnabled </span><span class="cov0" title="0">{
                         klog.Infof("Loading route #%v - [%s] %s\n", idx, route.HTTP.Method, route.HTTP.URI)
                 }</span>
-                <span class="cov0" title="0">r.HandleFunc(route.HTTP.URI, a.createHandler(route)).Methods(route.HTTP.Method)</span>
+
+                <span class="cov8" title="1">var handler http.HandlerFunc
+                handler = middlewares.PrometheusMiddleware(c.createHandlerFunc(route))
+
+                r.HandleFunc(route.HTTP.URI, handler).
+                        Name("HTTP(" + route.HTTP.URI + ")").
+                        Methods(route.HTTP.Method)</span>
         }
 
-        <span class="cov0" title="0">return r, nil</span>
+        <span class="cov8" title="1">return r, nil</span>
 }
 
-func (a *App) createHandler(route Route) func(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+func (c *Configuration) createHandlerFunc(route Route) http.HandlerFunc <span class="cov8" title="1">{
         return func(w http.ResponseWriter, r *http.Request) </span><span class="cov0" title="0">{
-                params, err := a.createQueryParams(r, route)
+                params, err := c.createQueryParams(r, route)
                 if err != nil </span><span class="cov0" title="0">{
                         http.Error(w, "could not create request", http.StatusBadRequest)
                         return
@@ -250,7 +350,7 @@ func (a *App) createHandler(route Route) func(w http.ResponseWriter, r *http.Req
                 graphQLRequest.Header.Add("Content-Type", "application/json")
                 graphQLRequest.Header.Set("X-Forwarded-For", r.RemoteAddr)
 
-                response, err := a.HTTPClient.Do(graphQLRequest)
+                response, err := c.HTTPClient.Do(graphQLRequest)
                 if err != nil </span><span class="cov0" title="0">{
                         http.Error(w, err.Error(), http.StatusInternalServerError)
                         return
@@ -259,12 +359,12 @@ func (a *App) createHandler(route Route) func(w http.ResponseWriter, r *http.Req
                 // Step 4: copy payload to response writer
                 <span class="cov0" title="0">copyHeader(w.Header(), response.Header)
                 w.WriteHeader(response.StatusCode)
-                io.Copy(w, response.Body)
-                response.Body.Close()</span>
+                _, _ = io.Copy(w, response.Body)
+                _ = response.Body.Close()</span>
         }
 }
 
-func (a *App) createQueryParams(r *http.Request, route Route) (map[string]interface{}, error) <span class="cov0" title="0">{
+func (c *Configuration) createQueryParams(r *http.Request, route Route) (map[string]interface{}, error) <span class="cov0" title="0">{
         params := make(map[string]interface{})
 
         reqVars := mux.Vars(r)
@@ -304,18 +404,14 @@ func (a *App) createQueryParams(r *http.Request, route Route) (map[string]interf
 
         <span class="cov0" title="0">return params, nil</span>
 }
-
-func traceCallsMiddleware(next http.Handler) http.Handler <span class="cov0" title="0">{
-        fn := func(w http.ResponseWriter, r *http.Request) </span><span class="cov0" title="0">{
-                klog.InfoS("Handling request", "uri", r.RequestURI, "method", r.Method, "#headers", len(r.Header))
-                next.ServeHTTP(w, r)
-        }</span>
-
-        <span class="cov0" title="0">return http.HandlerFunc(fn)</span>
-}
 </pre>
 		
-		<pre class="file" id="file3" style="display: none">// Copyright 2021 Ezequiel (Kimi) Aceto. All rights reserved.
+		<pre class="file" id="file4" style="display: none">/*
+ * ReGraphQL - Proxy
+ * This is the proxy service of project ReGraphQL
+ *
+ * Contact: ezequiel.aceto+regraphql@gmail.com
+ */
 
 package app
 
@@ -350,22 +446,22 @@ func isYaml(path string) bool <span class="cov8" title="1">{
         return hasYamlExt
 }</span>
 
-func (a *App) LoadRoutesFromFiles() ([]Route, error) <span class="cov8" title="1">{
+func (c *Configuration) loadRoutesFromFiles() ([]Route, error) <span class="cov8" title="1">{
         routes := make([]Route, 0, PreAllocatedRoutesNumber)
 
-        if a.DebugEnabled </span><span class="cov8" title="1">{
-                klog.Infof("Walking config files path: `%s`", a.RouterConfigsPath)
+        if c.DebugEnabled </span><span class="cov8" title="1">{
+                klog.Infof("Walking config files path: `%s`", c.RouterConfigsPath)
         }</span>
-        <span class="cov8" title="1">err := filepath.Walk(a.RouterConfigsPath, func(path string, info os.FileInfo, err error) error </span><span class="cov8" title="1">{
+        <span class="cov8" title="1">err := filepath.Walk(c.RouterConfigsPath, func(path string, info os.FileInfo, err error) error </span><span class="cov8" title="1">{
                 if err != nil </span><span class="cov8" title="1">{
-                        if a.DebugEnabled </span><span class="cov8" title="1">{
-                                klog.Errorf("Error walking config files path: `%s`", a.RouterConfigsPath)
+                        if c.DebugEnabled </span><span class="cov8" title="1">{
+                                klog.Errorf("Error walking config files path: `%s`", c.RouterConfigsPath)
                         }</span>
                         <span class="cov8" title="1">return err</span>
                 }
 
                 <span class="cov8" title="1">if info != nil &amp;&amp; !info.IsDir() &amp;&amp; len(path) &gt; 0 &amp;&amp; isYaml(path) </span><span class="cov8" title="1">{
-                        if a.DebugEnabled </span><span class="cov8" title="1">{
+                        if c.DebugEnabled </span><span class="cov8" title="1">{
                                 klog.Infof("Reading file: `%s`", path)
                         }</span>
                         <span class="cov8" title="1">file, fileErr := ioutil.ReadFile(path)
@@ -381,26 +477,31 @@ func (a *App) LoadRoutesFromFiles() ([]Route, error) <span class="cov8" title="1
 
                         <span class="cov8" title="1">routes = append(routes, fileConfig.Routes...)</span>
                 } else<span class="cov8" title="1"> if info != nil &amp;&amp; info.IsDir() </span><span class="cov8" title="1">{
-                        if a.DebugEnabled </span><span class="cov8" title="1">{
+                        if c.DebugEnabled </span><span class="cov8" title="1">{
                                 klog.Infof("Found directory: `%s`", info.Name())
                         }</span>
                 } else<span class="cov0" title="0"> if !isYaml(path) </span><span class="cov0" title="0">{
-                        if a.DebugEnabled </span><span class="cov0" title="0">{
+                        if c.DebugEnabled </span><span class="cov0" title="0">{
                                 klog.Warningf("Found non-yaml file: `%s`", path)
                         }</span>
                 }
                 <span class="cov8" title="1">return nil</span>
         })
 
-        <span class="cov8" title="1">if err != nil &amp;&amp; a.DebugEnabled </span><span class="cov8" title="1">{
-                klog.Errorf("Error walking config files path: `%s`", a.RouterConfigsPath)
+        <span class="cov8" title="1">if err != nil &amp;&amp; c.DebugEnabled </span><span class="cov8" title="1">{
+                klog.Errorf("Error walking config files path: `%s`", c.RouterConfigsPath)
         }</span>
 
         <span class="cov8" title="1">return routes, err</span>
 }
 </pre>
 		
-		<pre class="file" id="file4" style="display: none">// Copyright 2021 Ezequiel (Kimi) Aceto. All rights reserved.
+		<pre class="file" id="file5" style="display: none">/*
+ * ReGraphQL - Proxy
+ * This is the proxy service of project ReGraphQL
+ *
+ * Contact: ezequiel.aceto+regraphql@gmail.com
+ */
 
 package helpers
 
@@ -426,6 +527,38 @@ func GetEnvVar(key string, defaultValue string) string <span class="cov8" title=
         }</span>
 
         <span class="cov8" title="1">return defaultValue</span>
+}
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">/*
+ * ReGraphQL - Proxy
+ * This is the proxy service of project ReGraphQL
+ *
+ * Contact: ezequiel.aceto+regraphql@gmail.com
+ */
+
+package helpers
+
+import (
+        "github.com/gorilla/mux"
+        "k8s.io/klog/v2"
+)
+
+func LogEndpoints(r *mux.Router) <span class="cov0" title="0">{
+        klog.Info("Exposed endpoints")
+        _ = r.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error </span><span class="cov0" title="0">{
+                path, err := route.GetPathTemplate()
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil
+                }</span>
+                <span class="cov0" title="0">methods, err := route.GetMethods()
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil
+                }</span>
+                <span class="cov0" title="0">name := route.GetName()
+                klog.InfoS("Found HTTP endpoint", "name", name, "methods", methods, "path", path)
+                return nil</span>
+        })
 }
 </pre>
 		
