@@ -15,6 +15,7 @@ Doing this has the following benefits:
 * Queries are stored and controlled server side. No queries on the frontend.
 * Can modify and optimise your queries on demand without redoploying your (frontend) clients
 * Can use GET (HTTP Method) instead of GraphQL's POST
+* It's an OSS alternative to [Kong's DeGraphQL](https://marcoam-patch-3--kongdocs.netlify.app/hub/kong-inc/degraphql/)
  
 It helps you going...
 
