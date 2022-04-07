@@ -7,12 +7,12 @@
 
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/eaceto/ReGraphQL/Go?label=GitHub%20CI)
 
-**A simple (yet effective) REST / HTTP to GraphQL router**
+**A simple (yet effective) GraphQL to REST / HTTP router**.
 
-ReGraphQL helps you expose REST/HTTP endpoints and route it to a GraphQL endpoints.
+ReGraphQL helps you expose your GraphQL queries / mutations as  REST / HTTP endpoints.
 Doing this has the following benefits:
 
-* Queries are stored and controlled server side.
+* Queries are stored and controlled server side. No queries on the frontend.
 * Can modify and optimise your queries on demand without redoploying your (frontend) clients
 * Can use GET (HTTP Method) instead of GraphQL's POST
  
