@@ -79,7 +79,6 @@ GET /persons/{person}
 - [x] Docker Image below 20MB
 - [X] Exposes metrics using [Prometheus](https://prometheus.io/)
 - [X] Exposes Liveness, Readiness and Startup Probes 
-- [ ] Implements Hot reload for routes
 
 ## Service Endpoints
 
