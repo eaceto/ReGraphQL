@@ -22,3 +22,6 @@ go.work
 
 # (local | default) configs of the service
 config/
+
+# Ignore log files
+*.log
