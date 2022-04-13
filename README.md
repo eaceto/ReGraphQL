@@ -73,6 +73,7 @@ GET /persons/{person}
 
 - [x] Maps HTTP params to GraphQL Variables
 - [x] Forwards HTTP headers to GraphQL request
+- [ ] Set HTTP Status Code different to 200 if GraphQL query fails.
 - [x] Reads configuration from **.env** file
 - [x] Reads configuration from **environment variables**
 - [x] Logs using Kubernetes' [**klog**](https://github.com/kubernetes/klog) v2
