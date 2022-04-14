@@ -12,6 +12,7 @@ import (
 	"github.com/eaceto/ReGraphQL/app"
 	"github.com/eaceto/ReGraphQL/helpers"
 	serviceAPI "github.com/eaceto/ReGraphQL/services"
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
@@ -59,7 +60,7 @@ func main() {
 	}
 
 	srv := &http.Server{
-		Handler:      router,
+		Handler:      handlers.CompressHandler(router),
 		Addr:         application.Configuration.ServerAddr,
 		ReadTimeout:  application.Configuration.ServerReadTimeout,
 		WriteTimeout: application.Configuration.ServerWriteTimeout,

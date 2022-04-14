@@ -8,6 +8,9 @@
 package helpers
 
 import (
+	"bytes"
+	"io"
+
 	"github.com/gorilla/mux"
 	"k8s.io/klog/v2"
 )
@@ -27,4 +30,14 @@ func LogEndpoints(r *mux.Router) {
 		klog.InfoS("Found HTTP endpoint", "name", name, "methods", methods, "path", path)
 		return nil
 	})
+}
+
+func IOCopy(reader io.Reader) (map[string]interface{}, error) {
+	var (
+		m   map[string]interface{}
+		buf bytes.Buffer
+	)
+	_, err := io.Copy(&buf, reader)
+
+	return m, err
 }

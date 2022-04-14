@@ -9,11 +9,12 @@ package app
 
 import (
 	"fmt"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"k8s.io/klog/v2"
 	"os"
 	"path/filepath"
+
+	"gopkg.in/yaml.v2"
+	"k8s.io/klog/v2"
 )
 
 type Route struct {
@@ -26,6 +27,18 @@ type Route struct {
 		Query    string            `yaml:"query"`
 		Types    map[string]string `yaml:"types"`
 	} `yaml:"graphql"`
+	Errors struct {
+		HidePath      bool `yaml:"hidePath" default:"false"`
+		HideLocations bool `yaml:"hideLocations" default:"false"`
+		Extensions    struct {
+			Hide        bool           `yaml:"hide" default:"false"`
+			CodeMapping map[string]int `yaml:"codeMapping"`
+		} `yaml:"extensions"`
+	} `yaml:"errors"`
+}
+
+func (route *Route) shouldModifyResponse() bool {
+	return route.Errors.HideLocations || route.Errors.HidePath || route.Errors.Extensions.Hide
 }
 
 type routesConfig struct {

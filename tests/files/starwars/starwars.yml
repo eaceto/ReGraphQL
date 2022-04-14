@@ -2,6 +2,13 @@ routes:
     - http:
           uri: '/persons/{person}'
           method: GET
+      errors:
+          hidePath: true
+          hideLocations: true
+          extensions:
+              hide: true
+              codeMapping:
+                  BAD_USER_INPUT: 400
       graphql:
           endpoint: 'https://swapi.skyra.pw/'
           query: |

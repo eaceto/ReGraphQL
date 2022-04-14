@@ -9,6 +9,7 @@ package app
 
 import (
 	"fmt"
+
 	"github.com/gorilla/mux"
 )
 
@@ -45,5 +46,5 @@ func NewApplication(rootRouter *mux.Router) (*Application, error) {
 		Router:        router,
 		Routes:        routes,
 		Configuration: configuration,
-	}, nil
+	}, err
 }

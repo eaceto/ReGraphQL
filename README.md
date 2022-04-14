@@ -188,6 +188,10 @@ routes:
 curl 'http://127.0.0.1:8080/graphql/persons/lukeskywalker' --compressed
 ````
 
+### Handling errors
+
+
+
 ## Docker Image
 Docker image is based on Google's Distroless. The final image is around 11.2MB and packs only the necessary things to run the service.
 

@@ -11,12 +11,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/eaceto/ReGraphQL/middlewares"
-	"github.com/gorilla/mux"
 	"io"
-	"k8s.io/klog/v2"
 	"net/http"
 	"strconv"
+
+	"github.com/eaceto/ReGraphQL/middlewares"
+	"github.com/gorilla/mux"
+	"k8s.io/klog/v2"
 )
 
 type graphQLPayload struct {
@@ -37,8 +38,7 @@ func (c *Configuration) addServiceHTTPRouter(router *mux.Router, routes []Route)
 			klog.Infof("Loading route #%v - [%s] %s\n", idx, route.HTTP.Method, route.HTTP.URI)
 		}
 
-		var handler http.HandlerFunc
-		handler = middlewares.PrometheusMiddleware(c.createHandlerFunc(route))
+		handler := middlewares.PrometheusMiddleware(c.createHandlerFunc(route))
 
 		r.HandleFunc(route.HTTP.URI, handler).
 			Name("HTTP(" + route.HTTP.URI + ")").
@@ -86,13 +86,93 @@ func (c *Configuration) createHandlerFunc(route Route) http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+		defer func(Body io.ReadCloser) {
+			_ = Body.Close()
+		}(response.Body)
 
-		// Step 4: copy payload to response writer
+		if !route.shouldModifyResponse() {
+			copyHeader(w.Header(), response.Header)
+			w.WriteHeader(response.StatusCode)
+			_, _ = io.Copy(w, response.Body)
+			return
+		}
+
+		// Decode and analise response body
+		var responseMap map[string]interface{}
+		jsonErr := json.NewDecoder(response.Body).Decode(&responseMap)
+		if jsonErr != nil {
+			http.Error(w, jsonErr.Error(), http.StatusInternalServerError)
+			return
+		}
+
 		copyHeader(w.Header(), response.Header)
-		w.WriteHeader(response.StatusCode)
-		_, _ = io.Copy(w, response.Body)
-		_ = response.Body.Close()
+		w.Header().Set("Content-Type", "application/json")
+
+		statusCode := response.StatusCode
+
+		// check if it has errors
+		if responseErrors, ok := responseMap["errors"]; ok {
+			// response has errors
+			c.processResponseWithErrors(w, responseErrors, route, statusCode)
+			return
+		}
+
+		errorJsonData, jsonErr := json.Marshal(responseMap)
+		if jsonErr != nil {
+			http.Error(w, jsonErr.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		/// Response is OK, no need to modify it as there are no errors
+		w.Header().Set("Content-Length", strconv.Itoa(len(errorJsonData)))
+		_, _ = w.Write(errorJsonData)
+		w.WriteHeader(statusCode)
 	}
+}
+
+func (c *Configuration) processResponseWithErrors(w http.ResponseWriter, responseErrors interface{}, route Route, statusCode int) {
+	modifiedResponseErrors := make([]map[string]interface{}, 0)
+
+	switch v := responseErrors.(type) {
+	case []interface{}:
+		for _, anError := range v {
+			modifiedError := anError.(map[string]interface{})
+
+			if route.Errors.HidePath {
+				delete(modifiedError, "path")
+			}
+			if route.Errors.HideLocations {
+				delete(modifiedError, "locations")
+			}
+
+			if extensionsMap, okExtensionsMap := modifiedError["extensions"].(map[string]interface{}); okExtensionsMap {
+				if codeString, okCode := extensionsMap["code"].(string); okCode {
+					if codeInt, codeMapped := route.Errors.Extensions.CodeMapping[codeString]; codeMapped {
+						statusCode = codeInt
+					}
+				}
+			}
+			if route.Errors.Extensions.Hide {
+				delete(modifiedError, "extensions")
+			}
+
+			modifiedResponseErrors = append(modifiedResponseErrors, modifiedError)
+		}
+	default:
+	}
+
+	modifiedResponse := make(map[string][]map[string]interface{})
+	modifiedResponse["errors"] = modifiedResponseErrors
+
+	errorJsonData, jsonErr := json.Marshal(modifiedResponse)
+	if jsonErr != nil {
+		http.Error(w, jsonErr.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Length", strconv.Itoa(len(errorJsonData)))
+	_, _ = w.Write(errorJsonData)
+	w.WriteHeader(statusCode)
 }
 
 func (c *Configuration) createQueryParams(r *http.Request, route Route) (map[string]interface{}, error) {
